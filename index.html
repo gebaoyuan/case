@@ -1,13 +1,103 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>日常工作总结的特效</title>
+    <style>
+        html, body {
+            height: 100%;
+            background-color: #1D1F20;
+            background-color: #1D1F20;
+        }
+
+        .ge-container {
+            width: 1200px;
+            margin: auto;
+        }
+
+        .card--text {
+            color: #fff;
+        }
+
+        .card--title {
+            color: #1D1F20;
+            text-decoration: none;
+        }
+
+        .card {
+            width: 100%;
+            color: #fff;
+            background-image: linear-gradient(-154deg, red 0%, yellow 100%);
+            box-sizing: border-box;
+            border-radius: 8px;
+            padding: 10px;
+            line-height: 32px;
+            margin: 12px 0;
+            min-height: 124px;
+            box-sizing: border-box;
+            position: absolute;
+            transition: transform 1s ease;
+            backface-visibility: hidden;
+        }
+
+        .-orange {
+            background-image: linear-gradient(-143deg, #FA61C2 0%, #F76B1C 100%);
+        }
+
+        .-green {
+            background-image: linear-gradient(-144deg, #6AEEC6 0%, #698D28 100%);
+        }
+
+        .card-holder {
+            position: relative;
+            width: 300px;
+            display: inline-block;
+        }
+
+        .card-holder:hover .card.-front {
+            transform: rotateY(-0.5turn);
+        }
+
+        .card-holder:hover .card.-back {
+            transform: rotateY(0turn);
+        }
+
+        .-flipped {
+            transform: rotateY(0.5turn);
+        }
+
+        .container {
+            perspective: 1000px;
+        }
+
+    </style>
+
 </head>
-<body>
-test
+
+<body translate="no">
+<div class="ge-container">
+    <div class="card-holder">
+        <div class="card -small -back -flipped">
+            <a class="card--title" target="_blank"  href="demos/text1.html">文字特效 1</a>
+            <p class="card--text">
+                特效1是一个很牛逼的特效
+            </p>
+        </div>
+        <div class="card -small -front -orange">
+            翻牌 1
+        </div>
+    </div>
+    <div class="card-holder">
+        <div class="card -small -back -flipped">
+            <a class="card--title"  target="_blank" href="demos/textShadow.html">文字特效 2 </a>
+            <p class="card--text">
+                也是一个牛逼的特效
+            </p>
+        </div>
+        <div class="card -small -front -green">
+            翻牌 2
+        </div>
+    </div>
+</div>
 </body>
 </html>
