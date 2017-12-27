@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Canvas特效、试衣间、服装DIY、Html5、Css3、jQuery">
+    <meta name="description" content="一个前端工作者的学习笔记">
+    <title>Canvs高光、鼠标穿过PNG透明图特效</title>
+    <style>
+        .showArea {
+            width: 500px;
+            height: 500px;
+            margin: 70px auto 0;
+            transition: all ease .3s;
+            position: relative;
+        }
+
+        .showArea img, .showArea canvas {
+            max-height: 100%;
+            max-width: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .showArea canvas {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body>
+<div id="showArea" class="showArea"></div>
+<script src="https://cdn.bootcss.com/jquery/1.8.3/jquery.js"></script>
+<script>
+    function Diy(data) {
+
+        this.width = 500;
+        this.height = 500;
+        this.opacity = 0;//透明度阈值
+        this.curIndex;//指示当前第几个
+        this.imagesData = data;//图片数组
+        this.isCanCanvas = !!document.createElement('canvas').getContext;//是否支持canvas
+        this.computeCanvas = document.createElement('canvas');//计算位置用到的canvas
+        this.showCanvas = document.createElement('canvas');//显示用到的canvas
+        this.position = {};// 鼠标当前位置
+        this.showArea = $('#showArea');//div容器
+        this.computeCanvas.width = this.showCanvas.width = this.width;
+        this.computeCanvas.height = this.showCanvas.height = this.height;
+    }
+
+    Diy.prototype = {
+        init: function () {
+            //渲染
+            var pic = [], _diy = this;
+            ;
+            this.imagesData = this.imagesData.sort(function (itemA, itemB) {
+                return itemB.zindex - itemA.zindex;
+            })
+            for (var i = 0; i < this.imagesData.length; i++) {
+                var obj = this.imagesData[i],
+                    img = new Image();
+                img.crossOrigin = 'Anonymous'; //解决跨域
+                img.src = obj.imgurl;
+                (function (obj) {
+                    img.onload = function () {
+                        obj.isLoad = true;
+                    }
+                    img.onError = function () {
+                        obj.isLoad = false;
+                    }
+                })(obj)
+                obj.image = img;
+                pic.push('<img src="' + obj.imgurl + '" style="z-index:' + obj.zindex + '">');
+            }
+            this.showArea.html(pic.join(''));
+            this.showArea.append(this.showCanvas);
+
+
+            //绑定获取焦点
+            if (this.isCanCanvas) {//检测canvas支持
+                var delay = true;
+                _diy.showArea.mousemove(function (e) {
+                    if (delay) {
+                        clearTimeout(delay)
+                    }
+                    delay = setTimeout(function () {
+                        _diy.position = {
+                            x: e.offsetX,
+                            y: e.offsetY
+                        }
+                        var curIndex = _diy.getCurIndex();
+                        _diy.showImg(curIndex)
+                    }, 10);
+                });
+                _diy.showArea.mouseleave(function () {
+                    _diy.clearCanvas(_diy.showCanvas)
+                })
+                _diy.showArea.click(function(e){
+                    _diy.position = {
+                        x: e.offsetX,
+                        y: e.offsetY
+                    }
+                    var curIndex = _diy.getCurIndex();
+                    _diy.click &&  _diy.click(curIndex);
+                })
+            }
+        },
+        // 清空canvas
+        clearCanvas: function (canvas) {
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        },
+        getCurIndex: function () {
+            for (var i = 0; i < this.imagesData.length; i++) {
+                var imgData = this.imagesData[i];
+                this.clearCanvas(this.computeCanvas);
+                var ctx = this.computeCanvas.getContext('2d');
+                ctx.drawImage(imgData.image, 0, 0, this.width, this.height);
+                var imgPoints = ctx.getImageData(0, 0, this.width, this.height).data,
+                    _step = (this.position.y * this.width + this.position.x) * 4;
+                //rgba: [imgData[0 + _step], imgData[1 + _step], imgData[2 + _step], imgData[3 + _step]].join(),
+                // 如果此处不透明
+                if (imgPoints[3 + _step] > this.opacity) {
+                    return i;
+                }
+            }
+            return -1;
+        },
+        showImg: function (index) {
+            if (index == -1) {
+                this.clearCanvas(this.showCanvas)
+            } else if (index != this.curIndex) {
+                this.curIndex = index;
+                this.clearCanvas(this.showCanvas);
+                var ctx = this.showCanvas.getContext('2d'),
+                    imgData = this.imagesData[index];
+                ctx.globalCompositeOperation = "source-over";
+                ctx.drawImage(imgData.image, 0, 0, this.width, this.height);
+                this.showCanvas.style.zIndex = imgData.zindex;
+                ctx.fillStyle = 'red';
+                ctx.globalCompositeOperation = "source-atop";
+                ctx.fillRect(0, 0, 500, 500);
+            }
+        }
+    }
+    var data = [
+        {
+            "id": "51",
+            "name": "平驳头",
+            "imgurl": "images/1.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/1.png*/,
+            "zindex": "81"
+        },
+        {
+            "id": "145",
+            "name": "口袋",
+            "imgurl": "images/2.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/2.png*/,
+            "zindex": "66"
+        },
+        {
+            "name": "单排二粒扣",
+            "id": "37",
+            "zindex": 45,
+            "imgurl": "images/3.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/3.png*/
+        },
+        {
+            "name": "单排二粒扣",
+            "id": "37",
+            "zindex": 41,
+            "imgurl": "images/4.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/4.png*/
+        },
+        {
+            "name": "单排二粒扣",
+            "id": "37",
+            "zindex": 40,
+            "imgurl": "images/5.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/5.png*/
+        },
+        {
+            "id": "201",
+            "name": "西服",
+            "imgurl": "images/6.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/6.png*/,
+            "zindex": "33"
+        },
+        {
+            "id": "49",
+            "name": "领带",
+            "imgurl": "images/7.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/7.png*/,
+            "zindex": "8"
+        },
+        {
+            "id": "23",
+            "name": "衬衣",
+            "imgurl": "images/8.png"/*tpa=http://www.loveqiao.com/dom/html5css3/canvas/01/images/8.png*/,
+            "zindex": "6"
+        }
+    ]
+    var diy = new Diy(data);
+    diy.init();
+    diy.click = function(){
+        var imgData = this.imagesData[this.curIndex];
+        alert(`你点击了${imgData.name}`)
+    }
+</script>
+</body>
+</html>
